@@ -1,4 +1,226 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Y2K Word Counter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(145deg, #ffccff, #ccffff);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.5rem;
+      color: #ff66cc;
+      text-shadow: 2px 2px #ffffff;
+      margin-top: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toolbar {
+      background-color: #cce6ff;
+      border: 2px solid #99ccff;
+      width: 100%;
+      padding: 8px 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      box-shadow: inset 0 -2px 4px #ffffffcc;
+      display: flex;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+    }
+
+    .menu {
+      cursor: pointer;
+      color: #3366cc;
+      transition: color 0.2s;
+    }
+
+    .menu:hover {
+      color: #003399;
+      text-decoration: underline;
+    }
+
+    .counter-container {
+      background: #fff0ff;
+      border: 3px double #ff99cc;
+      box-shadow: 0 0 20px #ffccff;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 600px;
+      width: 90%;
+      margin: 20px auto;
+      position: relative;
+      transition: box-shadow 0.3s ease-in-out;
+    }
+
+    .counter-container.typing {
+      box-shadow: 0 0 30px 10px #ffccff, 0 0 60px 20px #ff99cc;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      border: 2px dashed #99ccff;
+      border-radius: 10px;
+      background-color: #ffffffee;
+      padding: 20px;
+      font-size: 16px;
+      resize: none;
+      font-family: 'Courier New', monospace;
+      box-sizing: border-box;
+    }
+
+    .word-count {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      background-color: #ffeeff;
+      border-radius: 10px;
+      padding: 10px 20px;
+      display: inline-block;
+      border: 2px dotted #ff66cc;
+      box-shadow: 2px 2px 5px #cccccc;
+    }
+
+    .save-button {
+      margin-top: 15px;
+      background-color: #ccffcc;
+      border: 2px solid #66cc99;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.6rem;
+      color: #006633;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      margin-right: 10px;
+    }
+
+    .save-button:hover {
+      background-color: #99ff99;
+      transform: scale(1.05);
+    }
+
+    .footer {
+      margin-top: auto;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #777;
+      font-family: 'Baloo 2', cursive;
+    }
+
+    .sparkles {
+      font-size: 20px;
+      animation: sparkle 1.5s infinite;
+    }
+
+    @keyframes sparkle {
+      0% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0.2; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="menu" onclick="menuClick('File')">File</div>
+    <div class="menu" onclick="menuClick('Edit')">Edit</div>
+    <div class="menu" onclick="menuClick('Tools')">Tools</div>
+    <div class="menu" onclick="menuClick('Help')">Help</div>
+  </div>
+
+  <h1><span class="sparkles">*~</span> Y2K Word Counter <span class="sparkles">~*</span></h1>
+
+  <div class="counter-container" id="counterContainer">
+    <textarea id="textInput" placeholder="Type your magical words here..."></textarea>
+    <div class="word-count" id="wordCount">Words: 0</div>
+    <div>
+      <button class="save-button" onclick="saveAsText()">Save as .txt</button>
+      <button class="save-button" onclick="saveAsDoc()">Save as .doc</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    Write like it's 1999!
+  </div>
+
+  <!-- Y2K click sound -->
+  <audio id="clickSound" src="https://freesound.org/data/previews/341/341695_6261194-lq.mp3"></audio>
+
+  <script>
+    const textarea = document.getElementById('textInput');
+    const wordCount = document.getElementById('wordCount');
+    const counterContainer = document.getElementById('counterContainer');
+    const clickSound = document.getElementById('clickSound');
+
+    textarea.addEventListener('input', () => {
+      const words = textarea.value.trim().split(/\s+/).filter(word => word.length > 0);
+      wordCount.textContent = `Words: ${words.length}`;
+
+      if (textarea.value.length > 0) {
+        counterContainer.classList.add('typing');
+      } else {
+        counterContainer.classList.remove('typing');
+      }
+    });
+
+    function saveAsText() {
+      const textToSave = textarea.value;
+      const filename = prompt("What would you like to name your file?", "my-magical-words.txt");
+      if (filename) {
+        const blob = new Blob([textToSave], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.download = filename.endsWith('.txt') ? filename : filename + '.txt';
+        link.href = window.URL.createObjectURL(blob);
+        link.click();
+        clickSound.play();
+      }
+    }
+
+    function saveAsDoc() {
+      const textToSave = textarea.value;
+      const filename = prompt("What would you like to name your Word file?", "my-magical-words.doc");
+      if (filename) {
+        const header = '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+                       'xmlns:w="urn:schemas-microsoft-com:office:word" ' +
+                       'xmlns="http://www.w3.org/TR/REC-html40">' +
+                       '<head><meta charset="utf-8"><title>Document</title></head><body>';
+        const footer = '</body></html>';
+        const sourceHTML = header + textToSave.replace(/\n/g, '<br>') + footer;
+
+        const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
+        const link = document.createElement('a');
+        link.download = filename.endsWith('.doc') ? filename : filename + '.doc';
+        link.href = window.URL.createObjectURL(blob);
+        link.click();
+        clickSound.play();
+      }
+    }
+
+    function menuClick(menuName) {
+      clickSound.play();
+      alert(menuName + ' menu coming soon!');
+    }
+  </script>
+
+</body>
+</html>
+<!--
+<!DOCTYPE html>
 <html lang="en">            
 <head>
   <meta charset="UTF-8">
@@ -137,8 +359,8 @@
   <h1><span class="sparkles">*~</span> Y2K Word Counter <span class="sparkles">~*</span></h1>
 
   <div class="counter-container">
-    <!--<img class="sticker" src="https://media.giphy.com/media/SZAgdazUyCm0I/giphy.gif" alt="sparkly sticker">-->
-    <textarea id="textInput" placeholder="Type your magical words here..."></textarea>
+    <!--<img class="sticker" src="https://media.giphy.com/media/SZAgdazUyCm0I/giphy.gif" alt="sparkly sticker"-->
+<!--    <textarea id="textInput" placeholder="Type your magical words here..."></textarea>
     <div class="word-count" id="wordCount">Words: 0</div>
     <button class="save-button" onclick="saveAsText()">Save as .txt</button>
   </div>
@@ -170,10 +392,11 @@
             <h3>Project 2: Another Cool Project</h3>
             <p>Description of your other project here.</p>
         </div>-->
-    </section>
+<!--    </section>
 
     <footer>
         <p>&copy; 2025 Marina Santos. All Rights Reserved.</p>
     </footer>
 </body>
 </html>
+-->
